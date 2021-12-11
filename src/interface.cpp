@@ -56,20 +56,12 @@ void create_parameters(){
      * добавляем свои обрабочки на вывод UI-секций
      * и действий над данными
      */
-    embui.section_handle_add(FPSTR(T_DEMO), block_demopage);                // generate "Demo" UI section
+    embui.section_handle_add(FPSTR(T_DEMO), block_dinamometr);                // generate "Demo" UI section
 
     // обработчики
     embui.section_handle_add(FPSTR(V_LED), action_blink);               // обработка рычажка светодиода
     embui.section_handle_add(FPSTR(V_UPDRATE), setRate);                 // sensor data publisher rate change
-
-#if defined CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32C3
-    // ESP32-C3 & ESP32-S2
-    {
-      temp_sensor_config_t cfg = TSENS_CONFIG_DEFAULT();
-      temp_sensor_set_config(cfg);
-      temp_sensor_start();
-    }
-#endif
+    
 };
 
 /**
@@ -93,7 +85,7 @@ void section_main_frame(Interface *interf, JsonObject *data){
     LOG(println, F("UI: Opening network setup section"));
     BasicUI::block_settings_netw(interf, data);
   } else {
-    block_demopage(interf, data);                   // Строим блок с demo переключателями
+    block_dinamometr(interf, data);                   // Строим блок с demo переключателями
   }
 }
 
@@ -110,7 +102,7 @@ void block_menu(Interface *interf, JsonObject *data){
      * пункт меню - "демо"
      */
 
-  interf->option(FPSTR(T_DEMO), F("UI Demo"));
+  interf->option(FPSTR(T_DEMO), F("Dinamometr"));
 
     /**
      * добавляем в меню пункт - настройки,
@@ -125,45 +117,26 @@ void block_menu(Interface *interf, JsonObject *data){
  * Demo controls
  * 
  */
-void block_demopage(Interface *interf, JsonObject *data){
+void block_dinamometr(Interface *interf, JsonObject *data){
     if (!interf) return;
     interf->json_frame_interface();
 
     // Headline
     // параметр FPSTR(T_SET_DEMO) определяет зарегистрированный обработчик данных для секции
-#if defined CONFIG_IDF_TARGET_ESP32  
-    LOG(println, F("CONFIG_IDF_TARGET_ESP32"));  
-    interf->json_section_main(FPSTR(T_SET_DEMO), F("Some ESP32 demo sensors"));
-#elif defined CONFIG_IDF_TARGET_ESP32S3
-    LOG(println, F("CONFIG_IDF_TARGET_ESP32S3"));
-    interf->json_section_main(FPSTR(T_DEMO), F("Some ESP32-S3 demo controls"));
-#elif defined CONFIG_IDF_TARGET_ESP32S2  
-    LOG(println, F("CONFIG_IDF_TARGET_ESP32S2"));
-    interf->json_section_main(FPSTR(T_SET_DEMO), F("Some ESP32-S2 demo sensors"));
-#elif defined CONFIG_IDF_TARGET_ESP32C3  
-    LOG(println, F("CONFIG_IDF_TARGET_ESP32C3"));
-    interf->json_section_main(FPSTR(T_SET_DEMO), F("Some ESP32-C3 demo sensors"));
-#else
-    LOG(println, F("ESP8266"));
-    interf->json_section_main(FPSTR(T_SET_DEMO), F("Some demo sensors"));
-#endif  
+
+    interf->json_section_main(FPSTR(T_SET_DEVICE), F("Страница отображения"));
 
     // переключатель, связанный со светодиодом. Изменяется синхронно
     interf->checkbox(FPSTR(V_LED), F("Onboard LED"), true);
 
-    interf->comment(F("Комментарий: набор сенсоров для демонстрации"));     // комментарий-описание секции
+    //interf->comment(F("Значение "));     // комментарий-описание секции
+    interf->display(F("vcc"), String("3.3"));
 
     interf->json_section_line();             // "Live displays"
 
-    // Voltage display, shows ESPs internal voltage
-#ifdef ESP8266
-    interf->display(F("vcc"), String(ESP.getVcc()/1000.0));
-#else
-    interf->display(F("vcc"), String("3.3"));
-    //interf->display(F("vcc"), String((float)rom_phy_get_vdd33()/1000.0)); // extern "C" int rom_phy_get_vdd33();
-#endif
-    // Fake temperature sensor
-    interf->display(F("temp"), String(24));
+    
+
+    //interf->display(F("temp"), String(24));
     interf->json_section_end();     // end of line
 
     // Simple Clock display

@@ -1,7 +1,7 @@
 #pragma once
 
 void block_menu(Interface *interf, JsonObject *data);
-void block_demopage(Interface *interf, JsonObject *data);
+void block_dinamometr(Interface *interf, JsonObject *data);
 void action_demopage(Interface *interf, JsonObject *data);
 void action_blink(Interface *interf, JsonObject *data);
 void pubCallback(Interface *interf);
